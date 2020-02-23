@@ -23,6 +23,7 @@ def pytest_html_results_summary(prefix, summary, postfix):
     prefix.extend([html.p("测试人员：")])
 
 
+@pytest.mark.optionalhook
 def pytest_html_results_table_header(cells):
     # 添加带有测试函数docstring的description列，添加可排序的time列，并删除links列
 
@@ -31,6 +32,7 @@ def pytest_html_results_table_header(cells):
     cells.pop()
 
 
+@pytest.mark.optionalhook
 def pytest_html_results_table_row(report, cells):
     cells.insert(2, html.td(report.description))
     cells.insert(1, html.td(datetime.now(), class_='col-time'))

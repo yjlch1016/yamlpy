@@ -31,11 +31,12 @@ class DemoTest(object):
 
     # 把几个列表合并成一个临时列表
 
-    def setup_class(self):
-        self.variable_result_dict = {}
+    @classmethod
+    def setup_class(cls):
+        cls.variable_result_dict = {}
         # 定义一个变量名与提取的结果字典
+        # cls.variable_result_dict与self.variable_result_dict都是本类的公共属性
 
-    @pytest.mark.usefixtures("cmd")
     @allure.story(test_story)
     @allure.severity(test_case_priority[0])
     @allure.testcase(test_case_address, test_case_address_title)
@@ -59,6 +60,8 @@ class DemoTest(object):
 
         case_name = temporary_dict.get("case_name")
         # 用例名称
+        self.test_order.__func__.__doc__ = case_name
+        # 测试报告里面的用例描述
         mysql = temporary_dict.get("mysql")
         # mysql语句
         request_mode = temporary_dict.get("request_mode")
@@ -90,8 +93,8 @@ class DemoTest(object):
 
         logger.info("{}>>>开始执行", case_name)
         if environment == "formal" and mysql:
-            pass
-        # 生产环境不能连接MySQL数据库，因此跳过，此行后面的都不会执行
+            pytest.skip("生产环境跳过此用例，请忽略")
+        # 生产环境不能连接MySQL数据库，因此跳过
 
         if self.variable_result_dict:
             # 如果变量名与提取的结果字典不为空
@@ -269,6 +272,7 @@ class DemoTest(object):
         else:
             logger.error("{}>>>请求失败！！！", url)
             logger.error("{}>>>执行失败！！！", case_name)
+            assume(expected_code == actual_code)
             assume(set(expected_result_list) <= set(actual_result_list))
         logger.info("##########用例分隔符##########\n")
 
