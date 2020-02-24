@@ -48,7 +48,7 @@ data: 请求体，缩进字典格式或者json格式
 headers: 请求头，缩进字典格式或者json格式    
 query_string: 请求参数，缩进字典格式或者json格式    
 expected_code: 预期的响应代码    
-expected_result: 预期的响应结果，缩进字典格式或者json格式  
+expected_result: 预期的响应结果，-列表格式、缩进字典格式或者json格式  
 regular: 正则，缩进字典格式  
 >>variable:变量名，-列表格式  
 >>expression:表达式，-列表格式  

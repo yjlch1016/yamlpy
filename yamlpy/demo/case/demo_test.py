@@ -14,22 +14,15 @@ import requests
 from pytest_assume.plugin import assume
 from setting.project_config import *
 from tool.connect_mysql import ConnectMySQL
-from tool.read_write_yaml import read_yaml
+from tool.read_write_yaml import merge_yaml
 from tool.function_assistant import function_dollar, function_rn, function_rl, function_sql
 
 
 @allure.feature(test_scenario)
 class DemoTest(object):
-    demo_one_list = read_yaml("/demo_one.yaml")
-    # 调用读取yaml文件的方法
-    demo_two_list = read_yaml("/demo_two.yaml")
-    demo_three_list = read_yaml("/demo_three.yaml")
+    temporary_list = merge_yaml()
 
-    temporary_list = demo_one_list + \
-                     demo_two_list + \
-                     demo_three_list
-
-    # 把几个列表合并成一个临时列表
+    # 调用合并所有yaml文件的方法
 
     @classmethod
     def setup_class(cls):
