@@ -98,7 +98,7 @@ class DemoTest(object):
                 if mysql[1]:
                     mysql[1] = function_dollar(mysql[1], self.variable_result_dict.items())
                 if mysql[2]:
-                    mysql[2] = function_dollar(mysql[1], self.variable_result_dict.items())
+                    mysql[2] = function_dollar(mysql[2], self.variable_result_dict.items())
             if api:
                 api = function_dollar(api, self.variable_result_dict.items())
             if payload:
@@ -261,13 +261,13 @@ class DemoTest(object):
                         logger.error("{}>>>发起请求之后mysql查询结果与实际的响应结果断言失败！！！", case_name)
                     assume(set(mysql_result_list_after) <= set(actual_result_list))
                     # 发起请求之后mysql查询结果与实际的响应结果是被包含关系
+            logger.info("##########用例分隔符##########\n")
             # 双重断言
         else:
-            logger.error("{}>>>请求失败！！！", url)
             logger.error("{}>>>执行失败！！！", case_name)
+            logger.error("预期的响应代码与实际的响应代码不相等：{}!={}", expected_code, actual_code)
             assume(expected_code == actual_code)
-            assume(set(expected_result_list) <= set(actual_result_list))
-        logger.info("##########用例分隔符##########\n")
+            logger.info("##########用例分隔符##########\n")
 
 
 if __name__ == "__main__":
