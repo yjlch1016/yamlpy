@@ -3,19 +3,20 @@
 
 
 # 一、思路         
-1、采用requests+PyMySQL+demjson+loguru+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-assume+pytest-rerunfailures+pytest-sugar+pytest-timeout  
+1、采用requests+PyMySQL+DBUtils+demjson+loguru+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-assume+pytest-rerunfailures+pytest-sugar+pytest-timeout  
 2、requests是发起HTTP请求的第三方库    
 3、PyMySQL是连接MySQL的第三方库   
-4、demjson是解析json的第三方库  
-5、loguru是记录日志的第三方库  
-6、PyYAML与ruamel.yaml是读写yaml文件的第三方库  
-7、pytest是单元测试的第三方库  
-8、pytest-html是生成html测试报告的插件  
-9、allure-pytest是生成allure测试报告的插件  
-10、pytest-assume是多重断言的插件  
-11、pytest-rerunfailures是失败重跑的插件   
-12、pytest-sugar是显示进度的插件  
-13、pytest-timeout是设置超时时间的插件  
+4、DBUtils是数据库连接池的第三方库  
+5、demjson是解析json的第三方库  
+6、loguru是记录日志的第三方库  
+7、PyYAML与ruamel.yaml是读写yaml文件的第三方库  
+8、pytest是单元测试的第三方库  
+9、pytest-html是生成html测试报告的插件  
+10、allure-pytest是生成allure测试报告的插件  
+11、pytest-assume是多重断言的插件  
+12、pytest-rerunfailures是失败重跑的插件   
+13、pytest-sugar是显示进度的插件  
+14、pytest-timeout是设置超时时间的插件  
 
 
 # 二、目录结构    
