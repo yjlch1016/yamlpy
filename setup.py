@@ -6,6 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 requires = [
     'requests==2.22.0',
     'PyMySQL==0.9.3',
+    'DBUtils==1.3',
     'demjson==2.2.4',
     'loguru==0.4.0',
     'PyYAML==5.1.2',
@@ -22,7 +23,7 @@ requires = [
 
 setup(
     name='yamlpy',
-    version='1.0.5',
+    version='1.0.6',
     description='yamlpy接口测试框架',
     author='yangjianliang',
     author_email='526861348@qq.com',

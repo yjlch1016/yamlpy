@@ -15,7 +15,7 @@ from pytest_assume.plugin import assume
 from setting.project_config import *
 from tool.connect_mysql import ConnectMySQL
 from tool.read_write_yaml import merge_yaml
-from tool.function_assistant import function_dollar, function_rn, function_rl, function_sql
+from tool.function_assistant import function_dollar, function_rn, function_rl, function_sql, function_mp
 
 
 @allure.feature(test_scenario)
@@ -162,6 +162,7 @@ class DemoTest(object):
         if payload:
             payload = function_rn(payload)
             payload = function_rl(payload)
+            payload = function_mp(payload)
             payload = demjson.decode(payload)
         if headers:
             headers = function_rn(headers)
@@ -170,6 +171,7 @@ class DemoTest(object):
         if query_string:
             query_string = function_rn(query_string)
             query_string = function_rl(query_string)
+            query_string = function_mp(query_string)
             query_string = demjson.decode(query_string)
 
         url = service_domain + api
