@@ -54,7 +54,7 @@ class DemoTest(object):
 
         case_name = temporary_dict.get("case_name")
         # 用例名称
-        self.test_order.__func__.__doc__ = case_name
+        self.test_demo.__func__.__doc__ = case_name
         # 测试报告里面的用例描述
         mysql = temporary_dict.get("mysql")
         # mysql语句
@@ -64,18 +64,26 @@ class DemoTest(object):
         # 接口路径
         if type(api) != str:
             api = str(api)
-        payload = temporary_dict.get("data")
+        payload = temporary_dict.get("body")
         # 请求体
-        if type(payload) != str:
-            payload = str(payload)
+        if payload:
+            if type(payload) != str:
+                payload = str(payload)
         headers = temporary_dict.get("headers")
         # 请求头
-        if type(headers) != str:
-            headers = str(headers)
+        if headers:
+            if type(headers) != str:
+                headers = str(headers)
         query_string = temporary_dict.get("query_string")
         # 请求参数
-        if type(query_string) != str:
-            query_string = str(query_string)
+        if query_string:
+            if type(query_string) != str:
+                query_string = str(query_string)
+        expected_time = temporary_dict.get("expected_time")
+        # 预期的响应时间
+        if expected_time:
+            if type(expected_time) != float:
+                expected_time = float(expected_time)
         expected_code = temporary_dict.get("expected_code")
         # 预期的响应代码
         expected_result = temporary_dict.get("expected_result")
@@ -86,7 +94,7 @@ class DemoTest(object):
         # 正则
 
         logger.info("{}>>>开始执行", case_name)
-        if environment == "formal" and mysql:
+        if environment == "prd" and mysql:
             pytest.skip("生产环境跳过此用例，请忽略")
         # 生产环境不能连接MySQL数据库，因此跳过
 
@@ -121,25 +129,23 @@ class DemoTest(object):
                 # 调用替换RN随机数字的方法
                 mysql[0] = function_rl(mysql[0])
                 # 调用替换RL随机字母的方法
-                if "INSERT" in mysql[0]:
+                mysql[0] = function_mp(mysql[0])
+                # 调用替换MP随机手机号码的方法
+                if "INSERT" in mysql[0] or "insert" in mysql[0]:
                     db.insert_mysql(mysql[0])
                     # 调用插入mysql的方法
                     sleep(2)
                     # 等待2秒钟
-                if "UPDATE" in mysql[0]:
+                if "UPDATE" in mysql[0] or "update" in mysql[0]:
                     db.update_mysql(mysql[0])
                     # 调用更新mysql的方法
                     sleep(2)
-                if "DELETE" in mysql[0]:
+                if "DELETE" in mysql[0] or "delete" in mysql[0]:
                     db.delete_mysql(mysql[0])
                     # 调用删除mysql的方法
                     sleep(2)
             if mysql[1]:
-                mysql[1] = function_rn(mysql[1])
-                # 调用替换RN随机数字的方法
-                mysql[1] = function_rl(mysql[1])
-                # 调用替换RL随机字母的方法
-                if "SELECT" in mysql[1]:
+                if "SELECT" in mysql[1] or "select" in mysql[1]:
                     mysql_result_tuple = db.query_mysql(mysql[1])
                     # mysql查询结果元祖
                     mysql_result_list = list(chain.from_iterable(mysql_result_tuple))
@@ -170,55 +176,73 @@ class DemoTest(object):
         if headers:
             headers = function_rn(headers)
             headers = function_rl(headers)
+            headers = function_mp(headers)
             headers = demjson.decode(headers)
         if query_string:
             query_string = function_rn(query_string)
             query_string = function_rl(query_string)
             query_string = function_mp(query_string)
             query_string = demjson.decode(query_string)
+        if expected_result:
+            expected_result = demjson.decode(expected_result)
 
         url = service_domain + api
         # 拼接完整地址
 
         logger.info("请求方式为：{}", request_mode)
-        logger.info("地址为：{}", url)
-        logger.info("请求体为：{}", json.dumps(payload, ensure_ascii=False))
-        logger.info("请求头为：{}", headers)
-        logger.info("请求参数为：{}", query_string)
+        logger.info("请求地址为：{}", url)
+        if payload:
+            logger.info("请求体为：{}", json.dumps(payload, ensure_ascii=False))
+        if headers:
+            logger.info("请求头为：{}", json.dumps(headers, ensure_ascii=False))
+        if query_string:
+            logger.info("请求参数为：{}", json.dumps(query_string, ensure_ascii=False))
+        if expected_time:
+            logger.info("预期的响应时间为：{}秒", expected_time)
         logger.info("预期的响应代码为：{}", expected_code)
-        logger.info("预期的响应结果为：{}", expected_result)
+        logger.info("预期的响应结果为：{}", json.dumps(expected_result, ensure_ascii=False))
 
-        response = requests.request(
-            request_mode, url, data=json.dumps(payload),
-            headers=headers, params=query_string, timeout=(12, 18)
-        )
-        # 发起HTTP请求
-        # json.dumps()序列化把字典转换成字符串，json.loads()反序列化把字符串转换成字典
-        # data请求体为字符串，headers请求头与params请求参数为字典
+        try:
+            response = requests.request(
+                request_mode, url, data=json.dumps(payload),
+                headers=headers, params=query_string, timeout=(12, 18)
+            )
+            # 发起HTTP请求
+            # json.dumps()序列化把字典转换成字符串，json.loads()反序列化把字符串转换成字典
+            # data请求体为字符串，headers请求头与params请求参数为字典
+        except Exception as e:
+            logger.error("HTTP请求发生错误：{}", e)
+            raise e
 
-        actual_time = response.elapsed.total_seconds()
-        # 实际的响应时间
-        actual_code = response.status_code
-        # 实际的响应代码
-        actual_result_text = response.text
-        # 实际的响应结果（文本格式）
+        try:
+            actual_time = response.elapsed.total_seconds()
+            logger.info("实际的响应时间为：{}秒", actual_time)
+        except Exception as e:
+            logger.error("获取实际的响应时间发生错误：{}", e)
+            raise e
+        try:
+            actual_code = response.status_code
+            logger.info("实际的响应代码为：{}", actual_code)
+        except Exception as e:
+            logger.error("获取实际的响应代码发生错误：{}", e)
+            raise e
+        try:
+            actual_result_text = response.text
+            logger.info("实际的响应结果为：{}", actual_result_text)
+        except Exception as e:
+            logger.error("获取实际的响应结果发生错误：{}", e)
+            raise e
 
         if mysql:
             if mysql[2]:
-                mysql[2] = function_rn(mysql[2])
-                mysql[2] = function_rl(mysql[2])
-                if "SELECT" in mysql[2]:
+                if "SELECT" in mysql[2] or "select" in mysql[2]:
                     db_after = ConnectMySQL()
                     mysql_result_tuple_after = db_after.query_mysql(mysql[2])
                     mysql_result_list_after = list(chain.from_iterable(mysql_result_tuple_after))
                     mysql_result_list_after = data_conversion_string(mysql_result_list_after)
+                    logger.info("发起请求之后mysql查询的结果列表为：{}", mysql_result_list_after)
                     mysql_result_list_after = list(map(str, mysql_result_list_after))
                     # 把列表里面的元素类型全部改为str
-                    logger.info("发起请求之后mysql查询的结果列表为：{}", mysql_result_list_after)
-
-        logger.info("实际的响应代码为：{}", actual_code)
-        logger.info("实际的响应结果为：{}", actual_result_text)
-        logger.info("实际的响应时间为：{}", actual_time)
 
         if regular:
             # 如果正则不为空
@@ -237,40 +261,48 @@ class DemoTest(object):
         else:
             pass
 
-        for key in list(self.variable_result_dict.keys()):
-            if not self.variable_result_dict[key]:
-                del self.variable_result_dict[key]
-        # 删除变量名与提取的结果字典中为空的键值对
+        if self.variable_result_dict:
+            for key in list(self.variable_result_dict.keys()):
+                if not self.variable_result_dict[key]:
+                    del self.variable_result_dict[key]
+            # 删除变量名与提取的结果字典中为空的键值对
 
-        expected_result = re.sub("{|}|\'|\"|\\[|\\]| ", "", expected_result)
-        actual_result_text = re.sub("{|}|\'|\"|\\[|\\]| ", "", actual_result_text)
+        expected_result = re.sub("{|}|\'|\"|\\[|\\]| ", "", json.dumps(expected_result, ensure_ascii=False))
         # 去除大括号{、}、单引号'、双引号"、中括号[、]与空格
+        if actual_result_text:
+            actual_result_text = re.sub("{|}|\'|\"|\\[|\\]| ", "", actual_result_text)
         expected_result_list = re.split(":|,", expected_result)
-        actual_result_list = re.split(":|,", actual_result_text)
         # 把文本转为列表，并去除:与,
-        logger.info("切割之后预期的响应结果列表为：{}", expected_result_list)
-        logger.info("切割之后实际的响应结果列表为：{}", actual_result_list)
+        actual_result_list = re.split(":|,", actual_result_text)
+        # logger.info("切割之后预期的响应结果列表为：{}", expected_result_list)
+        # if actual_result_list:
+        #     logger.info("切割之后实际的响应结果列表为：{}", actual_result_list)
 
         if expected_code == actual_code:
             # 如果预期的响应代码等于实际的响应代码
             if set(expected_result_list) <= set(actual_result_list):
-                # 判断是否是其真子集
                 logger.info("{}>>>预期的响应结果与实际的响应结果断言成功", case_name)
             else:
                 logger.error("{}>>>预期的响应结果与实际的响应结果断言失败！！！", case_name)
             assume(set(expected_result_list) <= set(actual_result_list))
-            # 预期的响应结果与实际的响应结果是被包含关系
             if mysql:
                 if mysql[2]:
                     if set(mysql_result_list_after) <= set(actual_result_list):
-                        # 判断是否是其真子集
                         logger.info("{}>>>发起请求之后mysql查询结果与实际的响应结果断言成功", case_name)
                     else:
                         logger.error("{}>>>发起请求之后mysql查询结果与实际的响应结果断言失败！！！", case_name)
                     assume(set(mysql_result_list_after) <= set(actual_result_list))
-                    # 发起请求之后mysql查询结果与实际的响应结果是被包含关系
+            if expected_time:
+                if actual_time <= expected_time:
+                    logger.info("{}>>>实际的响应时间与预期的响应时间断言成功", case_name)
+                else:
+                    logger.error("{}>>>实际的响应时间大于预期的响应时间！！！", case_name)
+                assume(actual_time <= expected_time)
             logger.info("##########用例分隔符##########\n")
-            # 双重断言
+            # 多重断言
+            # 预期的响应结果与实际的响应结果是被包含关系
+            # 发起请求之后mysql查询结果与实际的响应结果是被包含关系
+            # 实际的响应时间应该小于或者等于预期的响应时间
         else:
             logger.error("{}>>>执行失败！！！", case_name)
             logger.error("预期的响应代码与实际的响应代码不相等：{}!={}", expected_code, actual_code)
