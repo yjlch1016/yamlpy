@@ -60,7 +60,7 @@ pipeline {
                 jdk: '',
                 properties: [],
                 reportBuildPolicy: 'ALWAYS',
-                results: [[path: 'report/allure-report']]
+                results: [[path: 'report_log/allure-report']]
                 ])
             step([
                 $class: 'Mailer',
