@@ -94,7 +94,7 @@ class DemoTest(object):
         # 正则
 
         logger.info("{}>>>开始执行", case_name)
-        if environment == "prd" and mysql:
+        if environment == "formal" and mysql:
             pytest.skip("生产环境跳过此用例，请忽略")
         # 生产环境不能连接MySQL数据库，因此跳过
 
@@ -274,9 +274,9 @@ class DemoTest(object):
         expected_result_list = re.split(":|,", expected_result)
         # 把文本转为列表，并去除:与,
         actual_result_list = re.split(":|,", actual_result_text)
-        # logger.info("切割之后预期的响应结果列表为：{}", expected_result_list)
-        # if actual_result_list:
-        #     logger.info("切割之后实际的响应结果列表为：{}", actual_result_list)
+        logger.info("切割之后预期的响应结果列表为：{}", expected_result_list)
+        if actual_result_list:
+            logger.info("切割之后实际的响应结果列表为：{}", actual_result_list)
 
         if expected_code == actual_code:
             # 如果预期的响应代码等于实际的响应代码
@@ -306,8 +306,9 @@ class DemoTest(object):
         else:
             logger.error("{}>>>执行失败！！！", case_name)
             logger.error("预期的响应代码与实际的响应代码不相等：{}!={}", expected_code, actual_code)
-            assume(expected_code == actual_code)
             logger.info("##########用例分隔符##########\n")
+
+        assume(expected_code == actual_code)
 
 
 if __name__ == "__main__":
