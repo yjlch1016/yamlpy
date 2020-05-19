@@ -253,9 +253,9 @@ class DemoTest(object):
                 # re.findall(正则表达式, 实际的响应结果)返回一个符合规则的list，取第1个
                 extract_list.append(regular_result)
                 # 把提取结果添加到提取结果列表里面
-            temporary_dict = dict(zip(regular["variable"], extract_list))
+            variable_result_dict_temporary = dict(zip(regular["variable"], extract_list))
             # 把变量列表与提取结果列表转为一个临时字典
-            for key, value in temporary_dict.items():
+            for key, value in variable_result_dict_temporary.items():
                 self.variable_result_dict[key] = value
             # 把临时字典合并到变量名与提取的结果字典，已去重
         else:
