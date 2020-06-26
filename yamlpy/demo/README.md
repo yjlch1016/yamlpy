@@ -1,13 +1,53 @@
 # yamlpy  
 yamlpy接口测试框架  
 
+# 工程主页
+https://pypi.org/project/yamlpy/  
+https://github.com/yjlch1016/yamlpy  
 
+yamlpy即为yaml文件+pytest单元测试框架的缩写  
+可看作是一个脚手架工具  
+可快速生成项目的各个目录与文件  
+只需维护一份或者多份yaml文件即可   
+（或者json文件） 
+ 
+与[yamlapi接口测试框架](https://pypi.org/project/yamlapi/)对比，  
+整体结构仍然保持不变，  
+yaml文件格式仍然保持不变，  
+可以通用，  
+抛弃了python自带的unittest单元测试框架、ddt数据驱动第三方库、BeautifulReport测试报告第三方库，  
+修改了测试类文件， 
+传参方式由ddt的@ddt.ddt、@ddt.file_data()改为pytest的@pytest.mark.parametrize()，  
+删掉了tool工具包里面的beautiful_report_run.py文件，  
+其他文件保持不变。  
+
+`pip install yamlpy`  
+安装  
+
+`yamlpy -h（或yamlpy --help）`  
+查看参数信息  
+
+`yamlpy -v（或yamlpy --version）`  
+查看版本号  
+
+`pip install -U yamlpy`  
+安装最新版  
+
+`yamlpy --p=项目名称`  
+创建项目  
+例如在某个路径下执行命令：  
+`yamlpy --p=demo_project`  
+
+`pip uninstall yamlpy`  
+卸载  
+
+***
 # 一、思路         
-1、采用requests+PyMySQL+DBUtils+demjson+loguru+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-reportlog+pytest-assume+pytest-rerunfailures+pytest-sugar+pytest-timeout+pytest-parallel  
+1、采用requests+PyMySQL+DBUtils+demjson+loguru+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-reportlog+pytest-assume+pytest-rerunfailures+pytest-sugar+pytest-timeout+pytest-parallel+tablib  
 2、requests是发起HTTP请求的第三方库  
 3、PyMySQL是连接MySQL的第三方库  
 4、DBUtils是数据库连接池的第三方库  
-5、demjson是解析非标json的第三方库  
+5、demjson是解析非标格式json的第三方库  
 6、loguru是记录日志的第三方库  
 7、PyYAML与ruamel.yaml是读写yaml文件的第三方库  
 8、pytest是单元测试的第三方库  
@@ -19,11 +59,12 @@ yamlpy接口测试框架
 14、pytest-sugar是显示进度的插件  
 15、pytest-timeout是设置超时时间的插件  
 16、pytest-parallel是多线程的插件  
+17、tablib是导出多种格式数据的第三方库  
 
-
+***
 # 二、目录结构    
 1、case是测试用例包              
-2、report_log是测试报告的目录       
+2、report_log是测试报告和日志的目录       
 3、resource是yaml文件的目录      
 4、setting是工程的配置文件包            
 5、tool是常用方法的封装包  
@@ -33,40 +74,88 @@ yamlpy接口测试框架
 9、pytest.ini是pytest的配置文件  
 10、requirements.txt是第三方依赖库  
 
-
-# 三、yaml文件说明  
-    - case_name: 用例名称
-      step:
-        - step_name: 步骤名称
-          mysql: 
-            - 
-            - 
-            - 
-          request_mode: POST
-          api: /api/test
-          body: 
-            {"key_1":"value_1","key_2":"value_2"}
-          headers:
-            {"Content-Type":"application/json"}
-          expected_time: 3
-          expected_code: 200
-          expected_result:
-            {"code":1,"message":"成功"}
-          regular:
-            variable:
-              - name_1
-              - name_2
-            expression:
-              - '"response_1":"(.+?)"'
-              - '"response_2":"(.+?)"'
+***
+# 三、yaml、json文件说明  
+yaml文件  
+```yaml
+- case_name: 用例名称
+  step:
+    - step_name: 步骤名称
+      mysql:
+        -
+        -
+        -
+      request_mode: POST
+      api: /api/test
+      body:
+        {"key_1":"value_1","key_2":"value_2"}
+      headers:
+        {"Content-Type":"application/json"}
+      expected_time: 3
+      expected_code: 200
+      expected_result:
+        {"code":1,"message":"成功"}
+      regular:
+        variable:
+          - name_1
+          - name_2
+        expression:
+          - '"response_1":"(.+?)"'
+          - '"response_2":"(.+?)"'
+```
+json文件  
+```json
+[
+  {
+    "case_name": "用例名称",
+    "step": [
+      {
+        "step_name": "步骤名称",
+        "mysql": [],
+        "request_mode": "POST",
+        "api": "/api/test",
+        "body": "{\"key_1\":\"value_1\",\"key_2\":\"value_2\"}",
+        "headers": "{'Content-Type': 'application/json'}",
+        "expected_time": 3,
+        "expected_code": 200,
+        "expected_result": "{\"code\":1,\"message\":\"成功\"}",
+        "regular": {
+          "variable": [
+            "name_1",
+            "name_2"
+          ],
+          "expression": [
+            "\"response_1\":\"(.+?)\"",
+            "\"response_2\":\"(.+?)\""
+          ]
+        }
+      }
+    ]
+  }
+]
+```
 1、外层有2个字段，内层有13个字段  
 命名和格式不可修改，顺序可以修改  
-外层：  
-case_name：用例名称，必填  
-step：步骤，-列表格式  
-一条用例可以有多个步骤，全部的步骤通过，本条用例才算通过  
-内层：  
-step_name：步骤名称，必填  
+
+| 字段 | 中文名称 | 是否必填 | 格式 | 注解 |
+| ---- | ---- | --- | ---- | ---- |
+| case_name | 用例名称 | 是 | | |
+| step | 步骤 | 是 | -列表格式 | 1条用例可以有1个或者N个步骤，全部的步骤通过，本条用例才算通过 |
+| step_name | 步骤名称 | 是 | | |
+| mysql | MySQL语句 | 否 | -列表格式| 顺序不可修改 |
+| request_mode | 请求方式 | 是 | | |
+| api | 接口路径 | 是 | | |
+| body | 请求体 | 否 | 缩进字典格式或者json格式 | |
+| headers | 请求头 | 否 | 缩进字典格式或者json格式 | |
+| query_string | 请求参数 | 否 | 缩进字典格式或者json格式 | |
+| expected_time | 预期的响应时间 | 否 | | |
+| expected_code | 预期的响应代码 | 是 | | |
+| expected_result  | 预期的响应结果 | 是 | -列表格式、缩进字典格式或者json格式 | |
+| regular | 正则 | 否 | 缩进字典格式 | |
+| variable | 变量名 | 否 | -列表格式 | |
+| expression | 表达式 | 否 | -列表格式 | |
+
+2、mysql字段说明  
 mysql： MySQL语句，-列表格式，顺序不可修改，选填  
 第一行：mysql[0]  
 第二行：mysql[1]  
@@ -78,38 +167,43 @@ mysql： MySQL语句，-列表格式，顺序不可修改，选填
 当不需要增删改查和双重断言时，可以不写mysql字段，或者三行都为空  
 当只需要增删改时，第一行为增删改语句，第二行为空，第三行为空  
 当只需要查时，第一行为空，第二行为查语句，第三行为空  
-当只需要双重断言时，第一行为空，第二行为空，第三行为查语句  
-request_mode: 请求方式，必填  
-api: 接口路径，必填  
-body: 请求体，缩进字典格式或者json格式，选填  
-headers: 请求头，缩进字典格式或者json格式，选填  
-query_string: 请求参数，缩进字典格式或者json格式，选填  
-expected_time: 预期的响应时间，选填    
-expected_code: 预期的响应代码，必填  
-expected_result: 预期的响应结果，-列表格式、缩进字典格式或者json格式，必填  
-regular: 正则，缩进字典格式，选填  
->>variable:变量名，-列表格式  
->>expression:表达式，-列表格式  
+当只需要双重断言时，第一行为空，第二行为空，第三行为查语句 
 
-2、参数化  
+3、参数化  
 正则表达式提取的结果用${变量名}匹配，一条用例里面可以有多个  
 MySQL查询语句返回的结果，即第二行mysql[1]返回的结果，用{__SQL索引}匹配  
 即{__SQL0}、{__SQL1}、{__SQL2}、{__SQL3}。。。。。。一条用例里面可以有多个  
-随机数字用{__RN位数}，一条用例里面可以有多个   
+随机数字用{__RN位数}，一条用例里面可以有多个  
 随机英文字母用{__RL位数}，一条用例里面可以有多个  
 随机手机号码用{__MP}，一条用例里面可以有多个  
 以上5种类型在一条用例里面可以混合使用  
 ${变量名}的作用域是全局的，其它4种的作用域仅限该条用例  
 
-
+***
 # 四、运行  
-在工程的根目录下执行命令  
+1、pytest模式：  
 pytest+--cmd=环境缩写  
-pytest --cmd=dev  
-pytest --cmd=test  
-pytest --cmd=pre  
-pytest --cmd=formal  
+`pytest --cmd=dev`  
+开发环境  
+`pytest --cmd=test`  
+测试环境  
+`pytest --cmd=pre`  
+预生产环境  
+`pytest --cmd=formal`  
+生产环境  
 
+2、运行结果  
+会在report_log目录下生成以下文件  
+allure-report  
+log年月日.log  
+report.html  
+report.xml  
+test_case.csv  
+test_case.html  
+test_case.json  
+test_case.xlsx  
+test_case.yaml  
 
+***
 # 五、从阿里云镜像仓库拉取镜像  
-docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlapi:[镜像版本号]  
+`docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlpy:[镜像版本号]`  

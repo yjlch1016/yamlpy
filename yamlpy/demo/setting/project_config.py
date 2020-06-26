@@ -90,5 +90,8 @@ tester = "测试人员："
 # conftest配置
 
 
-first_yaml = "demo_one.yaml"
-# 第一个yaml文件
+test_case_format = "yaml"
+# 测试用例的格式：yaml或者json
+# 不可混用，只能选取一种格式
+first_test_case_file = "demo_one.yaml"
+# 第一个测试用例文件

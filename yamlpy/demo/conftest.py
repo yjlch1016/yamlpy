@@ -53,7 +53,7 @@ def pytest_addoption(parser):
     # 注册自定义的命令
 
     parser.addoption(
-        "--cmd", action="store", default="fat", help="被测环境的缩写"
+        "--cmd", action="store", default="test", help="被测环境的缩写"
     )
 
 

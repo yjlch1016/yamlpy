@@ -15,21 +15,30 @@ from pytest_assume.plugin import assume
 from setting.project_config import *
 from tool.connect_mysql import ConnectMySQL
 from tool.data_type_conversion import data_conversion_string
+from tool.export_test_case import export_various_formats
 from tool.read_write_yaml import merge_yaml
+from tool.read_write_json import merge_json
 from tool.function_assistant import function_dollar, function_rn, function_rl, function_sql, function_mp
 
 
 @allure.feature(test_scenario)
 class DemoTest(object):
-    temporary_list = merge_yaml()
-
-    # 调用合并所有yaml文件的方法
+    if test_case_format == "yaml":
+        temporary_list = merge_yaml()
+        # 调用合并所有yaml文件的方法
+    if test_case_format == "json":
+        temporary_list = merge_json()
+        # 调用合并所有json文件的方法
 
     @classmethod
     def setup_class(cls):
+
         cls.variable_result_dict = {}
         # 定义一个变量名与提取的结果字典
         # cls.variable_result_dict与self.variable_result_dict都是本类的公共属性
+
+        cls.test_case_data_list = []
+        # 定义一个测试用例数据列表
 
     @allure.story(test_story)
     @allure.severity(test_case_priority[0])
@@ -43,7 +52,7 @@ class DemoTest(object):
         :return:
         """
 
-        global mysql_result_list_after
+        global mysql_result_list_after, temporary_list
 
         temporary_dict = str(temporary_dict)
         if "None" in temporary_dict:
@@ -100,6 +109,7 @@ class DemoTest(object):
             regular = item.get("regular")
             # 正则
 
+            logger.info("步骤名称为：{}", step_name)
             if environment == "formal" and mysql:
                 pytest.skip("跳过生产环境，请忽略")
             # 生产环境不能连接MySQL数据库，因此跳过
@@ -208,10 +218,24 @@ class DemoTest(object):
             logger.info("预期的响应代码为：{}", expected_code)
             logger.info("预期的响应结果为：{}", json.dumps(expected_result, ensure_ascii=False))
 
+            self.test_case_data_list.append((
+                case_name,
+                step_name,
+                request_mode,
+                url,
+                json.dumps(payload, ensure_ascii=False),
+                json.dumps(headers, ensure_ascii=False),
+                json.dumps(query_string, ensure_ascii=False),
+                expected_time,
+                expected_code,
+                json.dumps(expected_result, ensure_ascii=False)
+            ))
+            # 把用例数据添加到测试用例数据列表
+
             try:
                 response = requests.request(
                     request_mode, url, data=json.dumps(payload),
-                    headers=headers, params=query_string, timeout=(12, 18)
+                    headers=headers, params=query_string, timeout=(15, 20)
                 )
                 # 发起HTTP请求
                 # json.dumps()序列化把字典转换成字符串，json.loads()反序列化把字符串转换成字典
@@ -315,6 +339,13 @@ class DemoTest(object):
                 logger.info("##########步骤分隔符##########\n")
 
             assume(expected_code == actual_code)
+        logger.info("**********{}>>>执行结束**********\n", case_name)
+
+    @classmethod
+    def teardown_class(cls):
+
+        export_various_formats(cls.test_case_data_list)
+        # 调用导出各种格式的测试用例的方法
 
 
 if __name__ == "__main__":
