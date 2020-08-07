@@ -83,6 +83,7 @@ test_case_address_title = "XXX接口测试用例地址"
 # allure配置
 
 
+html_report_title = "XXX接口测试报告"
 project_name = "XXX接口自动化测试"
 swagger_address = "http://www.swagger.com/swagger-ui.html"
 test_department = "测试部门："

@@ -28,7 +28,7 @@ requires = [
 
 setup(
     name='yamlpy',
-    version='1.1.2',
+    version='1.1.3',
     description='yamlpy接口测试框架',
     author='yangjianliang',
     author_email='526861348@qq.com',
@@ -49,7 +49,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'yamlpy=yamlpy.yaml_py:start_project',
+            'yamlpy=yamlpy.yaml_py:cli',
         ],
     },
     python_requires='>=3.5',

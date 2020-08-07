@@ -1,8 +1,10 @@
 # yamlpy  
 yamlpy接口测试框架  
 
-# 工程主页
+# 工程主页  
+pypi：  
 https://pypi.org/project/yamlpy/  
+github：  
 https://github.com/yjlch1016/yamlpy  
 
 yamlpy即为yaml文件+pytest单元测试框架的缩写  
@@ -13,10 +15,10 @@ yamlpy即为yaml文件+pytest单元测试框架的缩写
  
 与[yamlapi接口测试框架](https://pypi.org/project/yamlapi/)对比，  
 整体结构仍然保持不变，  
-yaml文件格式仍然保持不变，  
+yaml文件（或者json文件）格式仍然保持不变，  
 可以通用，  
 抛弃了python自带的unittest单元测试框架、ddt数据驱动第三方库、BeautifulReport测试报告第三方库，  
-修改了测试类文件， 
+修改了测试类文件，  
 传参方式由ddt的@ddt.ddt、@ddt.file_data()改为pytest的@pytest.mark.parametrize()，  
 删掉了tool工具包里面的beautiful_report_run.py文件，  
 其他文件保持不变。  
@@ -33,10 +35,15 @@ yaml文件格式仍然保持不变，
 `pip install -U yamlpy`  
 安装最新版  
 
-`yamlpy --p=项目名称`  
+`yamlpy create --p=项目名称`  
 创建项目  
 例如在某个路径下执行命令：  
-`yamlpy --p=demo_project`  
+`yamlpy create --p=demo_project`  
+
+`yamlpy run --c=环境缩写`  
+运行项目  
+例如在项目的根目录下面执行命令：  
+`yamlpy run --c=test`  
 
 `pip uninstall yamlpy`  
 卸载  
@@ -91,6 +98,8 @@ yaml文件
         {"key_1":"value_1","key_2":"value_2"}
       headers:
         {"Content-Type":"application/json"}
+      query_string:
+        {"key_3":"value_3","key_4":"value_4"}
       expected_time: 3
       expected_code: 200
       expected_result:
@@ -116,6 +125,7 @@ json文件
         "api": "/api/test",
         "body": "{\"key_1\":\"value_1\",\"key_2\":\"value_2\"}",
         "headers": "{'Content-Type': 'application/json'}",
+        "query_string": "{'key_3':'value_3','key_4':'value_4'}",
         "expected_time": 3,
         "expected_code": 200,
         "expected_result": "{\"code\":1,\"message\":\"成功\"}",
@@ -173,11 +183,12 @@ mysql： MySQL语句，-列表格式，顺序不可修改，选填
 正则表达式提取的结果用${变量名}匹配，一条用例里面可以有多个  
 MySQL查询语句返回的结果，即第二行mysql[1]返回的结果，用{__SQL索引}匹配  
 即{__SQL0}、{__SQL1}、{__SQL2}、{__SQL3}。。。。。。一条用例里面可以有多个  
-随机数字用{__RN位数}，一条用例里面可以有多个  
-随机英文字母用{__RL位数}，一条用例里面可以有多个  
+随机数字用{__RN位数}，如{__RN15}，一条用例里面可以有多个  
+随机英文字母用{__RL位数}，如{__RL10}，一条用例里面可以有多个  
 随机手机号码用{__MP}，一条用例里面可以有多个  
-以上5种类型在一条用例里面可以混合使用  
-${变量名}的作用域是全局的，其它4种的作用域仅限该条用例  
+随机日期时间字符串用{__RD开始年份,结束年份}，如{__RD2019,2020}，一条用例里面可以有多个  
+以上6种类型在一条用例里面可以混合使用  
+${变量名}的作用域是全局的，其它5种的作用域仅限该条用例  
 
 ***
 # 四、运行  
@@ -192,7 +203,18 @@ pytest+--cmd=环境缩写
 `pytest --cmd=formal`  
 生产环境  
 
-2、运行结果  
+2、yamlpy模式：  
+yamlpy+run+--c=环境缩写  
+`yamlpy run --c=dev`  
+开发环境  
+`yamlpy run --c=test`  
+测试环境  
+`yamlpy run --c=pre`  
+预生产环境  
+`yamlpy run --c=formal`  
+生产环境  
+
+3、运行结果：  
 会在report_log目录下生成以下文件  
 allure-report  
 log年月日.log  
@@ -206,4 +228,4 @@ test_case.yaml
 
 ***
 # 五、从阿里云镜像仓库拉取镜像  
-`docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlpy:[镜像版本号]`  
+`docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlpy:0.0.6`  

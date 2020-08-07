@@ -18,7 +18,8 @@ from tool.data_type_conversion import data_conversion_string
 from tool.export_test_case import export_various_formats
 from tool.read_write_yaml import merge_yaml
 from tool.read_write_json import merge_json
-from tool.function_assistant import function_dollar, function_rn, function_rl, function_sql, function_mp
+from tool.function_assistant import function_dollar, function_rn, function_rl, \
+    function_sql, function_mp, function_rd
 
 
 @allure.feature(test_scenario)
@@ -32,6 +33,10 @@ class DemoTest(object):
 
     @classmethod
     def setup_class(cls):
+        """
+        准备工作
+        :return:
+        """
 
         cls.variable_result_dict = {}
         # 定义一个变量名与提取的结果字典
@@ -147,6 +152,8 @@ class DemoTest(object):
                     # 调用替换RL随机字母的方法
                     mysql[0] = function_mp(mysql[0])
                     # 调用替换MP随机手机号码的方法
+                    mysql[0] = function_rd(mysql[0])
+                    # 调用替换RD随机日期时间的方法
                     if "INSERT" in mysql[0] or "insert" in mysql[0]:
                         db.insert_mysql(mysql[0])
                         # 调用插入mysql的方法
@@ -188,16 +195,19 @@ class DemoTest(object):
                 payload = function_rn(payload)
                 payload = function_rl(payload)
                 payload = function_mp(payload)
+                payload = function_rd(payload)
                 payload = demjson.decode(payload)
             if headers:
                 headers = function_rn(headers)
                 headers = function_rl(headers)
                 headers = function_mp(headers)
+                headers = function_rd(headers)
                 headers = demjson.decode(headers)
             if query_string:
                 query_string = function_rn(query_string)
                 query_string = function_rl(query_string)
                 query_string = function_mp(query_string)
+                query_string = function_rd(query_string)
                 query_string = demjson.decode(query_string)
             if expected_result:
                 expected_result = demjson.decode(expected_result)
@@ -255,6 +265,12 @@ class DemoTest(object):
                 logger.info("实际的响应代码为：{}", actual_code)
             except Exception as e:
                 logger.error("获取实际的响应代码发生错误：{}", e)
+                raise e
+            try:
+                actual_headers = response.headers
+                logger.info("实际的响应头为：{}", actual_headers)
+            except Exception as e:
+                logger.error("获取实际的响应头发生错误：{}", e)
                 raise e
             try:
                 actual_result_text = response.text
@@ -343,6 +359,10 @@ class DemoTest(object):
 
     @classmethod
     def teardown_class(cls):
+        """
+        清理工作
+        :return:
+        """
 
         export_various_formats(cls.test_case_data_list)
         # 调用导出各种格式的测试用例的方法
