@@ -28,7 +28,7 @@ requires = [
 
 setup(
     name='yamlpy',
-    version='1.1.3',
+    version='1.1.4',
     description='yamlpy接口测试框架',
     author='yangjianliang',
     author_email='526861348@qq.com',

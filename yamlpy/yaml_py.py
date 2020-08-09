@@ -10,7 +10,7 @@ CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 def print_version(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
-    click.echo('V1.1.3')
+    click.echo('V1.1.4')
     ctx.exit()
 
 
