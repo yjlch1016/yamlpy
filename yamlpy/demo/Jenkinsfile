@@ -3,12 +3,12 @@
 pipeline {
 
     agent {
-        docker { image 'registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlapi:0.0.6' }
+        docker { image 'registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlapi:0.0.7' }
     }
 
     parameters {
         choice(
-            name:'measured_environment', 
+            name:'measured_environment',
             choices: ['test', 'pre', 'formal', 'dev'],
             description: '被测环境')
     }
@@ -18,7 +18,12 @@ pipeline {
     }
 
     options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        buildDiscarder(
+            logRotator(
+                daysToKeepStr: '7',
+                numToKeepStr: '10',
+                artifactDaysToKeepStr: '7'
+                artifactNumToKeepStr: '10'))
     }
 
     triggers {
@@ -68,6 +73,7 @@ pipeline {
                 notifyEveryUnstableBuild: true,
                 sendToIndividuals: true
                 ])
+            deleteDir()
         }
     }
 

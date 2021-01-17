@@ -2,6 +2,8 @@
 yamlpy接口测试框架  
 
 # 工程主页  
+readthedocs：  
+https://yamlpy-docs.readthedocs.io/zh_CN/latest/  
 pypi：  
 https://pypi.org/project/yamlpy/  
 github：  
@@ -12,14 +14,14 @@ yamlpy即为yaml文件+pytest单元测试框架的缩写
 可快速生成项目的各个目录与文件  
 只需维护一份或者多份yaml文件即可   
 （或者json文件） 
- 
-与[yamlapi接口测试框架](https://pypi.org/project/yamlapi/)对比，  
+
+与[yamlapi接口测试框架](https://github.com/yjlch1016/yamlapi)对比，  
 整体结构仍然保持不变，  
 yaml文件（或者json文件）格式仍然保持不变，  
 可以通用，  
 抛弃了python自带的unittest单元测试框架、ddt数据驱动第三方库、BeautifulReport测试报告第三方库，  
 修改了测试类文件，  
-传参方式由ddt的@ddt.ddt、@ddt.file_data()改为pytest的@pytest.mark.parametrize()，  
+传参方式由ddt的@ddt.ddt、@ddt.data()改为pytest的@pytest.mark.parametrize()，  
 删掉了tool工具包里面的beautiful_report_run.py文件，  
 其他文件保持不变。  
 
@@ -43,30 +45,38 @@ yaml文件（或者json文件）格式仍然保持不变，
 `yamlpy run --c=环境缩写`  
 运行项目  
 例如在项目的根目录下面执行命令：  
-`yamlpy run --c=test`  
+`yamlpy run --c=fat`  
+
+`yamlpy clean`  
+清理测试报告与日志目录下的所有文件  
+类似于`mvn clean`  
 
 `pip uninstall yamlpy`  
 卸载  
 
 ***
 # 一、思路         
-1、采用requests+PyMySQL+DBUtils+demjson+loguru+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-reportlog+pytest-assume+pytest-rerunfailures+pytest-sugar+pytest-timeout+pytest-parallel+tablib  
+1、采用requests+PyMySQL+DBUtils+psycopg2-binary+pymongo+demjson+loguru+
+PyYAML+ruamel.yaml+pytest+pytest-html+allure-pytest+pytest-reportlog+pytest-assume+pytest-rerunfailures+pytest-instafail+pytest-sugar+pytest-timeout+pytest-parallel+tablib  
 2、requests是发起HTTP请求的第三方库  
 3、PyMySQL是连接MySQL的第三方库  
 4、DBUtils是数据库连接池的第三方库  
-5、demjson是解析非标格式json的第三方库  
-6、loguru是记录日志的第三方库  
-7、PyYAML与ruamel.yaml是读写yaml文件的第三方库  
-8、pytest是单元测试的第三方库  
-9、pytest-html是生成html测试报告的插件  
-10、allure-pytest是生成allure测试报告的插件  
-11、pytest-reportlog是替换--resultlog选项的插件  
-12、pytest-assume是多重断言的插件  
-13、pytest-rerunfailures是失败重跑的插件  
-14、pytest-sugar是显示进度的插件  
-15、pytest-timeout是设置超时时间的插件  
-16、pytest-parallel是多线程的插件  
-17、tablib是导出多种格式数据的第三方库  
+5、psycopg2-binary是连接PgSQL的第三方库  
+6、pymongo是连接Mongo的第三方库  
+7、demjson是解析非标格式json的第三方库  
+8、loguru是记录日志的第三方库  
+9、PyYAML与ruamel.yaml是读写yaml文件的第三方库  
+10、pytest是单元测试的第三方库  
+11、pytest-html是生成html测试报告的插件  
+12、allure-pytest是生成allure测试报告的插件  
+13、pytest-reportlog是替换--resultlog选项的插件  
+14、pytest-assume是多重断言的插件  
+15、pytest-rerunfailures是失败重跑的插件  
+16、pytest-instafail是实时显示错误信息的插件  
+17、pytest-sugar是显示进度的插件  
+18、pytest-timeout是设置超时时间的插件  
+19、pytest-parallel是多线程的插件  
+20、tablib是导出多种格式数据的第三方库  
 
 ***
 # 二、目录结构  
@@ -94,8 +104,20 @@ yaml文件
         -
         -
         -
+      pgsql:
+        -
+        -
+        -
+      mongo:
+        -
+        -
+        -
       request_mode: POST
       api: /api/test
+      file:
+        -
+        -
+        -
       body:
         {"key_1":"value_1","key_2":"value_2"}
       headers:
@@ -123,8 +145,11 @@ json文件
       {
         "step_name": "步骤名称",
         "mysql": [],
+        "pgsql": [],
+        "mongo": [],
         "request_mode": "POST",
         "api": "/api/test",
+        "file": [],
         "body": "{\"key_1\":\"value_1\",\"key_2\":\"value_2\"}",
         "headers": "{'Content-Type': 'application/json'}",
         "query_string": "{'key_3':'value_3','key_4':'value_4'}",
@@ -146,7 +171,7 @@ json文件
   }
 ]
 ```
-1、外层有2个字段，内层有13个字段  
+1、外层有2个字段，内层有16个字段  
 命名和格式不可修改，顺序可以修改  
 
 | 字段 | 中文名称 | 是否必填 | 格式 | 注解 |
@@ -154,9 +179,12 @@ json文件
 | case_name | 用例名称 | 是 | | |
 | step | 步骤 | 是 | -列表格式 | 1条用例可以有1个或者N个步骤，全部的步骤通过，本条用例才算通过 |
 | step_name | 步骤名称 | 是 | | |
-| mysql | MySQL语句 | 否 | -列表格式| 顺序不可修改 |
+| mysql | MySQL语句 | 否 | -列表格式 | 顺序不可修改 |
+| pgsql | PgSQL语句 | 否 | -列表格式 | 顺序不可修改 |
+| mongo | Mongo语句 | 否 | -列表格式 | 顺序不可修改 |
 | request_mode | 请求方式 | 是 | | |
 | api | 接口路径 | 是 | | |
+| file | 文件 | 否 | -列表格式 | 顺序不可修改 |
 | body | 请求体 | 否 | 缩进字典格式或者json格式 | |
 | headers | 请求头 | 否 | 缩进字典格式或者json格式 | |
 | query_string | 请求参数 | 否 | 缩进字典格式或者json格式 | |
@@ -169,28 +197,102 @@ json文件
 
 2、mysql字段说明  
 mysql： MySQL语句，-列表格式，顺序不可修改，选填  
+
+| 位置 | 索引 | 作用 | 是否必填 | 格式 | 注解 |
+| ---- | ---- | --- | --- | ---- | ---- |
+| 第一行 | mysql[0] | 增删改 | 否 | 字符串 | 增、删、改语句 |
+| 第二行 | mysql[1] | 查 | 否 | 字符串 | 查语句（动态传参） |
+| 第三行 | mysql[2] | 查 | 否 | 字符串 | 查语句（数据库双重断言）|
+
 第一行：mysql[0]  
 第二行：mysql[1]  
 第三行：mysql[2]  
-第一行为增、删、改语句，第二行为查语句，第三行为查语句（数据库双重断言）  
+第一行为增、删、改语句，第二行为查语句（动态传参），第三行为查语句（数据库双重断言）  
 第一行是发起请求之前的动作，没有返回结果  
 第二行是发起请求之前的动作，有返回结果，是为了动态传参  
 第三行是发起请求之后的动作，有返回结果，但是不可用于动态传参，是为了断言实际的响应结果  
 当不需要增删改查和双重断言时，可以不写mysql字段，或者三行都为空  
 当只需要增删改时，第一行为增删改语句，第二行为空，第三行为空  
 当只需要查时，第一行为空，第二行为查语句，第三行为空  
-当只需要双重断言时，第一行为空，第二行为空，第三行为查语句 
+当只需要双重断言时，第一行为空，第二行为空，第三行为查语句  
 
-3、参数化  
+3、pgsql字段说明  
+pgsql： PgSQL语句，-列表格式，顺序不可修改，选填  
+
+| 位置 | 索引 | 作用 | 是否必填 | 格式 | 注解 |
+| ---- | ---- | --- | --- | ---- | ---- |
+| 第一行 | pgsql[0] | 增删改 | 否 | 字符串 | 增、删、改语句 |
+| 第二行 | pgsql[1] | 查 | 否 | 字符串 | 查语句（动态传参） |
+| 第三行 | pgsql[2] | 查 | 否 | 字符串 | 查语句（数据库双重断言）|
+
+第一行：pgsql[0]  
+第二行：pgsql[1]  
+第三行：pgsql[2]  
+第一行为增、删、改语句，第二行为查语句（动态传参），第三行为查语句（数据库双重断言）  
+第一行是发起请求之前的动作，没有返回结果  
+第二行是发起请求之前的动作，有返回结果，是为了动态传参  
+第三行是发起请求之后的动作，有返回结果，但是不可用于动态传参，是为了断言实际的响应结果  
+当不需要增删改查和双重断言时，可以不写pgsql字段，或者三行都为空  
+当只需要增删改时，第一行为增删改语句，第二行为空，第三行为空  
+当只需要查时，第一行为空，第二行为查语句，第三行为空  
+当只需要双重断言时，第一行为空，第二行为空，第三行为查语句  
+
+4、mongo字段说明（参考mysql字段）  
+mongo： Mongo语句，-列表格式，顺序不可修改，选填  
+
+| 位置 | 索引 | 作用| 是否必填 | 格式 | 注解 |
+| ---- | ---- | --- | --- | ---- | ---- |
+| 第一行 | mongo[0]  | 增删改 | 否 | -列表格式 | 第一个元素为集合名，第二个元素为增删改，第三个元素为增删改参数 |
+| 第二行 | mongo[1] | 查 | 否 | -列表格式 | 第一个元素为集合名，第二个元素为查参数 |
+| 第三行 | mongo[2] | 查 | 否 | -列表格式 | 第一个元素为集合名，第二个元素为查参数 |
+ 
+第一行：mongo[0]  
+第二行：mongo[1]  
+第三行：mongo[2]  
+第一行为增、删、改，第二行为查（动态传参），第三行为查（数据库双重断言）  
+第一行是发起请求之前的动作，没有返回结果  
+第二行是发起请求之前的动作，有返回结果，是为了动态传参  
+第三行是发起请求之后的动作，有返回结果，但是不可用于动态传参，是为了断言实际的响应结果  
+当不需要增删改查和双重断言时，可以不写mongo字段，或者三行都为空  
+当只需要增删改时，第一行为增、删、改，第二行为空，第三行为空  
+当只需要查时，第一行为空，第二行为查，第三行为空  
+当只需要双重断言时，第一行为空，第二行为空，第三行为查  
+
+5、file字段说明  
+file： 文件参数，-列表格式，顺序不可修改，选填  
+
+| 位置 | 类型 | 是否必填 | 格式 | 注解 |
+| ---- | --- | --- | ---- | ---- |
+| 第一行 | 文件类型 | 否 | 字符串 | 例如：file |
+| 第二行 | 文件名称 | 否 | 字符串 | 例如：demo_excel.xlsx |
+| 第三行 | MIME类型 | 否 | 字符串 | 例如：application/octet-stream |
+
+6、函数助手  
+
+| 函数名称 | 写法 | 作用域| 数量限制 |
+| ---- | ---- | --- | --- |
+| 正则表达式提取的结果 | ${变量名}  | 全局 | 不限 |
+| MySQL查询语句返回的结果 | {__SQL索引} | 本条用例 | 不限 |
+| PgSQL查询语句返回的结果 | {__PGSQL索引} | 本条用例 | 不限 |
+| Mongo查询语句返回的结果 | {__MONGO索引} | 本条用例 | 不限 |
+| 随机数字 | {__RN位数} | 本条用例 | 不限 |
+| 随机英文字母 | {__RL位数} | 本条用例 | 不限 |
+| 随机手机号码 | {__MP} | 本条用例 | 不限 |
+| 随机日期时间字符串 | {__RD开始年份,结束年份} | 本条用例 | 不限 |
+
 正则表达式提取的结果用${变量名}匹配，一条用例里面可以有多个  
 MySQL查询语句返回的结果，即第二行mysql[1]返回的结果，用{__SQL索引}匹配  
 即{__SQL0}、{__SQL1}、{__SQL2}、{__SQL3}。。。。。。一条用例里面可以有多个  
+PgSQL查询语句返回的结果，即第二行pgsql[1]返回的结果，用{__PGSQL索引}匹配  
+即{__PGSQL0}、{__PGSQL1}、{__PGSQL2}、{__PGSQL3}。。。。。。一条用例里面可以有多个  
+Mongo查询语句返回的结果，即第二行mongo[1]返回的结果，用{__MONGO索引}匹配  
+即{__MONGO0}、{__MONGO1}、{__MONGO2}、{__MONGO3}。。。。。。一条用例里面可以有多个  
 随机数字用{__RN位数}，如{__RN15}，一条用例里面可以有多个  
 随机英文字母用{__RL位数}，如{__RL10}，一条用例里面可以有多个  
 随机手机号码用{__MP}，一条用例里面可以有多个  
 随机日期时间字符串用{__RD开始年份,结束年份}，如{__RD2019,2020}，一条用例里面可以有多个  
-以上6种类型在一条用例里面可以混合使用  
-${变量名}的作用域是全局的，其它5种的作用域仅限该条用例  
+以上8种类型在一条用例里面可以混合使用  
+${变量名}的作用域是全局的，其它7种的作用域仅限该条用例   
 
 ***
 # 四、运行  
@@ -230,7 +332,7 @@ test_case.yaml
 
 ***
 # 五、打包镜像  
-`docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlapi:0.0.6`  
+`docker pull registry.cn-hangzhou.aliyuncs.com/yangjianliang/yamlapi:0.0.7`  
 从阿里云镜像仓库拉取yamlapi镜像
 
 `docker build -t demo_image .`  
