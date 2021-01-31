@@ -45,7 +45,7 @@ yaml文件（或者json文件）格式仍然保持不变，
 `yamlpy run --c=环境缩写`  
 运行项目  
 例如在项目的根目录下面执行命令：  
-`yamlpy run --c=fat`  
+`yamlpy run --c=test`  
 
 `yamlpy clean`  
 清理测试报告与日志目录下的所有文件  
